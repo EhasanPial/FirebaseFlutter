@@ -2,22 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase/model_class.dart';
 
 class FireStoreController {
-  static Future<List<User>> getAllEntries(String collection) async {
+  static Future<List<UserModel>> getAllEntries(String collection) async {
 
 
     return (await FirebaseFirestore.instance.collection(collection).get())
         .docs
-        .map((item) => User.fromMap(item.data()))
+        .map((item) => UserModel.fromMap(item.data()))
         .toList();
   }
   static Future<Stream<QuerySnapshot<Map<String, dynamic>>>> getAllEntriesStreamBuilder(String collection) async {
     return FirebaseFirestore.instance
-        .collection("Users")
+        .collection("UserModels")
         .snapshots();
   }
 
   static DocumentReference<Map<String, dynamic>> generateID() {
-    final newCityRef = FirebaseFirestore.instance.collection("Users").doc();
+    final newCityRef = FirebaseFirestore.instance.collection("UserModels").doc();
     return newCityRef;
   }
 
@@ -28,19 +28,19 @@ class FireStoreController {
 
   static Future<void> uploadingData(Map<String, dynamic> data) async {
     await FirebaseFirestore.instance
-        .collection("Users")
+        .collection("UserModels")
         .add(data)
         .then((value) {});
   }
 
-  static Future<void> editProduct(User user, String id) async {
+  static Future<void> editProduct(UserModel UserModel, String id) async {
     await FirebaseFirestore.instance
-        .collection("Users")
+        .collection("UserModels")
         .doc(id)
-        .update(user.toMap());
+        .update(UserModel.toMap());
   }
 
   static Future<void> deleteProduct(DocumentSnapshot doc) async {
-    await FirebaseFirestore.instance.collection("Users").doc(doc.id).delete();
+    await FirebaseFirestore.instance.collection("UserModels").doc(doc.id).delete();
   }
 }

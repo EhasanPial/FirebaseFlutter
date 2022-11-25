@@ -1,7 +1,9 @@
+import 'package:firebase/auth_provider.dart';
 import 'package:firebase/details_page.dart';
 import 'package:firebase/firebase_operation.dart';
-import 'package:firebase/homepage.dart';
+import 'package:firebase/login_page.dart';
 import 'package:firebase/model_class.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,7 +26,32 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: NewPage(),
+      home: MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<User?>(
+        stream: Auth().authStateChanges,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return NewPage();
+          } else {
+            return LoginPage();
+          }
+        },
+      ),
     );
   }
 }
@@ -40,20 +67,42 @@ class _NewPageState extends State<NewPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
 
+  final User? user = Auth().currentUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text(
             "Data",
-
           ),
           centerTitle: true,
           leading: Icon(Icons.menu),
           backgroundColor: Colors.deepOrange,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.logout,
+                color: Colors.white,
+              ),
+              onPressed: () async {
+                await Auth().signOut() ;
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginPage())) ;
+
+              },
+            )
+          ],
         ),
         body: Column(
           children: [
+            Container(
+              child: Column(
+                children: [
+                  Text("User Email: ${user?.email ?? ""}"),
+                  Text("User Id: ${user?.uid ?? ""}")
+                ],
+              ),
+            ),
             Expanded(
               child: Container(
                   color: Colors.white,
@@ -63,7 +112,10 @@ class _NewPageState extends State<NewPage> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.data == null)
-                        return CircularProgressIndicator();
+                        return SizedBox(
+                          height: 10,
+                          child: CircularProgressIndicator(),
+                        );
                       return ListView.builder(
                         itemBuilder: (context, index) {
                           DocumentSnapshot data = snapshot.data!.docs[index];
@@ -82,21 +134,26 @@ class _NewPageState extends State<NewPage> {
                             child: Column(
                               children: [
                                 Container(
-
                                     padding: EdgeInsets.all(8),
                                     margin: EdgeInsets.all(15),
                                     child: Row(
-
                                       children: [
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
                                               child: Row(
                                                 children: [
-                                                  Text("Name: ", style: TextStyle(fontWeight: FontWeight.bold ,color: Colors.black),),
+                                                  Text(
+                                                    "Name: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  ),
                                                   Text("${data['name']}"),
                                                 ],
                                               ),
@@ -105,10 +162,17 @@ class _NewPageState extends State<NewPage> {
                                               height: 1,
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
                                               child: Row(
                                                 children: [
-                                                  Text("Age: ", style: TextStyle(fontWeight: FontWeight.bold ,color: Colors.black),),
+                                                  Text(
+                                                    "Age: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  ),
                                                   Text("${data['regions']}"),
                                                 ],
                                               ),
@@ -119,14 +183,19 @@ class _NewPageState extends State<NewPage> {
                                           flex: 3,
                                         ),
                                         IconButton(
-                                            onPressed: () {
-                                              FireStoreController.deleteProduct(
-                                                  data);
-                                            },
-                                            icon: Icon(Icons.delete), color: Colors.red,)
+                                          onPressed: () {
+                                            FireStoreController.deleteProduct(
+                                                data);
+                                          },
+                                          icon: Icon(Icons.delete),
+                                          color: Colors.red,
+                                        )
                                       ],
                                     )),
-                                Divider(height: 1, thickness: 1,)
+                                Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                )
                               ],
                             ),
                           );
@@ -168,15 +237,15 @@ class _NewPageState extends State<NewPage> {
                       onPressed: () {
                         if (nameController.text.isNotEmpty &&
                             nameController.text.isNotEmpty) {
-                          User newUser = new User(
+                          UserModel newUser = new UserModel(
                               name: nameController.text,
                               age: ageController.text);
                           //var ref = FireStoreController.generateID();
                           var ref = FireStoreController.uploadingData(
                               newUser.toMap());
                           print(ref);
-                          nameController.text ="";
-                          ageController.text="" ;
+                          nameController.text = "";
+                          ageController.text = "";
                         }
                       },
                     )

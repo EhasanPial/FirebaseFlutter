@@ -61,7 +61,7 @@ class DetailsPage extends StatelessWidget {
                 onPressed: () {
                   if (nameController.text.isNotEmpty &&
                       nameController.text.isNotEmpty) {
-                    User newUser = new User(
+                    UserModel newUser = new UserModel(
                         name: nameController.text, age: ageController.text);
                     //var ref = FireStoreController.generateID();
 

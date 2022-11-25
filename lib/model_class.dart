@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-class User {
-  User({required this.name, required this.age});
+class UserModel {
+  UserModel({required this.name, required this.age});
 
   final String name;
   final String age;
@@ -10,14 +10,14 @@ class User {
   final String manufacturer;
   final int price;*/
 
-  factory User.fromJson(String str) =>
-      User.fromMap(json.decode(str)); // decode string ke json e convert kore
+  factory UserModel.fromJson(String str) =>
+      UserModel.fromMap(json.decode(str)); // decode string ke json e convert kore
 
   String toJson() => json.encode(toMap());
 
-  factory User.fromMap(Map<String, dynamic> map){
-    return  User(
-      // map theke new User
+  factory UserModel.fromMap(Map<String, dynamic> map){
+    return  UserModel(
+      // map theke new UserModel
       name: map["name"],
       age: map["age"],
     );
